@@ -1,15 +1,19 @@
 import sys
+import time
 
 import pygame
 
+
+
 pygame.init()
 pygame.display.set_caption('智能五子棋')
-screen = pygame.display.set_mode((1080, 900))
+screen = pygame.display.set_mode((1080, 900), pygame.RESIZABLE)
 screen.fill((255, 255, 255))
 
 MARGIN = 30
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+existing_chess = []
 letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o']
 numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15']
 numbers.reverse()
@@ -47,13 +51,20 @@ def draw_board(screen: pygame.Surface) -> None:
     pygame.draw.circle(screen, BLACK, (MARGIN + 3 * 55, 12 * 55 - MARGIN), 5, 0)
     pygame.draw.circle(screen, BLACK, (MARGIN + 11 * 55, 12 * 55 - MARGIN), 5, 0)
     pygame.draw.circle(screen, BLACK, (MARGIN + 7 * 55, 8 * 55 - MARGIN), 5, 0)
-    print("Draw board complete. display.draw_board()")
+    # print("Draw board complete. display.draw_board()")
 
 
 def draw_chess(screen: pygame.Surface, position: tuple[int, int], color: str) -> None:
     dest = WHITE if color == "white" else BLACK
     center = (MARGIN + (position[0] - 1) * 55, (16 - position[1]) * 55 - MARGIN)
     pygame.draw.circle(screen, dest, center, 20, 0)
+    if [position, color] not in existing_chess:
+        existing_chess.append([position, color])
+
+
+def rerender_all_chess(screen: pygame.Surface) -> None:
+    for each in existing_chess:
+        draw_chess(screen, each[0], each[1])
 
 
 def convert_position(compound_expr: str) -> tuple[int, int]:
@@ -66,10 +77,12 @@ def convert_position(compound_expr: str) -> tuple[int, int]:
     return letters.index(x) + 1, int(y)
 
 
-draw_board(screen)
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
-            sys.exit(0)
+            quit()
+    screen.fill((255, 255, 255))
+    draw_board(screen)
+    rerender_all_chess(screen)
     pygame.display.flip()
